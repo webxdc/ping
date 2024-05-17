@@ -1,5 +1,6 @@
 import {
   defineConfig,
+  extractorSplit,
   presetAttributify,
   presetIcons,
   presetTypography,
@@ -7,9 +8,21 @@ import {
   presetWebFonts,
   transformerDirectives,
   transformerVariantGroup,
-} from 'unocss'
+} from "unocss";
 
 export default defineConfig({
+  theme: {
+    colors: {
+      primary: "var(--primary)",
+      accent: "var(--accent)",
+      bg: "var(--bg)",
+      "bg-light": "var(--bg-ligth)",
+    },
+  },
+  shortcuts: {
+    btnn: "bg-primary text-white p-2 rounded",
+  },
+  extractors: [extractorSplit],
   presets: [
     presetUno(),
     presetAttributify(),
@@ -19,15 +32,11 @@ export default defineConfig({
     presetTypography(),
     presetWebFonts({
       fonts: {
-        sans: 'DM Sans',
-        serif: 'DM Serif Display',
-        mono: 'DM Mono',
+        sans: "DM Sans",
+        serif: "DM Serif Display",
+        mono: "DM Mono",
       },
     }),
   ],
-  transformers: [
-    transformerDirectives(),
-    transformerVariantGroup(),
-  ],
-  safelist: 'prose prose-sm m-auto text-left'.split(' '),
-})
+  transformers: [transformerDirectives(), transformerVariantGroup()],
+});

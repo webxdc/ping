@@ -69,8 +69,12 @@ window.webxdc = (() => {
       updateListener(update);
     } else if (event.key === ephemeralUpdateKey) {
       var [sender, update] = JSON.parse(event.newValue);
-      if (window.webxdc.selfAddr !== sender && realtimeListener && !realtimeListener.is_trashed()) {
-        realtimeListener.receive( Uint8Array.from(update));
+      if (
+        window.webxdc.selfAddr !== sender &&
+        realtimeListener &&
+        !realtimeListener.is_trashed()
+      ) {
+        realtimeListener.receive(Uint8Array.from(update));
       }
     }
   });
@@ -97,8 +101,8 @@ window.webxdc = (() => {
       return Promise.resolve();
     },
     joinRealtimeChannel: (cb) => {
-      if (realtimeListener && realtimeListener.is_trashed()) {
-        return;
+      if (realtimeListener && !realtimeListener.is_trashed()) {
+        throw new Error("realtime listener already exists");
       }
       realtimeListener = new RealtimeListener();
       return realtimeListener;

@@ -18,7 +18,10 @@
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
+    "@unocss/reset": "^0.60.2",
+    "date-fns": "^3.6.0",
     "solid-js": "^1.8.11",
+    "solidjs-use": "^2.3.0",
     "unocss": "^0.60.2"
   }
 }

@@ -1,10 +1,8 @@
-import 'uno.css';
+import 'virtual:uno.css';
 import { render } from 'solid-js/web';
 import "./style.css";
-import "./script.ts";
-
+import "@unocss/reset/tailwind.css";
 import App from './App';
-
 const root = document.getElementById('root');
 
 if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
