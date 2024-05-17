@@ -1,6 +1,6 @@
-import { For, createEffect, type Component } from 'solid-js';
+import { For, type Component } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
-import { useInterval, useIntervalFn } from 'solidjs-use';
+import { useIntervalFn } from 'solidjs-use';
 import ResponseView from './ResponseView';
 
 interface Request {
@@ -23,6 +23,8 @@ function is_response(data: any): data is Response {
 function is_request(data: any): data is Request {
   return 'seq' in data && 'sender' in data
 }
+
+const colors = ['#3b82f6', '#4ade80', '#facc15', '#fb923c', '#f87171', '#9f1239', '#a21caf']
 
 let realtimeChannel;
 
@@ -55,7 +57,6 @@ const App: Component = () => {
   }
 
   const { pause, resume, isActive } = useIntervalFn(() => {
-    // console.log("Sending Ping");
     sendTimes[seq] = Date.now()
     let req: Request = { sender: window.webxdc.selfName, seq }
     realtimeChannel.send(enc.encode(JSON.stringify(req)))
@@ -68,12 +69,10 @@ const App: Component = () => {
     pause()
   }
 
-  createEffect(() => {
-    console.log(devices)
-  })
-
   function join() {
     console.log("Joining Realtime");
+    //reset state
+    setDevices(reconcile({}))
     realtimeChannel = window.webxdc.joinRealtimeChannel()
     realtimeChannel.setListener(listener)
     resume()
@@ -87,8 +86,8 @@ const App: Component = () => {
 
         <div class="flex flex-wrap gap-5 mt-5 justify-center">
           <For each={Object.values(devices)} fallback={
-            < p class="text-center text-gray-600 font-italic"> {isActive() ? "Waiting for pings .." : "You need to join the gossip"}</p>}>
-            {(data) => ResponseView(data)}
+            <p class="text-center text-gray-600 font-italic"> {isActive() ? "Waiting for pings .." : "You need to join the gossip"}</p>}>
+            {(data, index) => ResponseView({ ...data, active: isActive, color: colors[index() % colors.length] })}
           </For>
         </div>
       </div>
