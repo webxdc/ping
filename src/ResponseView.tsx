@@ -1,16 +1,18 @@
-import { For, type Component } from 'solid-js';
+import { For, createEffect, type Component } from 'solid-js';
 import { PingData } from './App';
 import { format } from 'date-fns';
 interface ChatProps {
-  user: string;
+  name: string;
   data: PingData[];
 }
 
-const Chats: Component<ChatProps> = ({ user, data }) => {
+const Chats: Component<ChatProps> = ({ name, data }) => {
+  createEffect(() => console.log(data))
+
   return (
     <div style="width: 300px">
-      <h1 class="ml-1 font-bold case-capital text-xl"> {user} </h1>
-      <div class="border-2 rounded-md p-4 py-1">
+      <h1 class="ml-1 font-bold case-capital text-xl"> {name} </h1>
+      <div class="border-2 rounded-md p-4 py-1 overflow-y-auto" style="max-height: 200px">
         <For each={data}>
           {ping => (
             <div class="flex gap-2">

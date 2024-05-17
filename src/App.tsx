@@ -1,5 +1,5 @@
-import { For, createEffect, createSignal, type Component } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { For, createEffect, type Component } from 'solid-js';
+import { createStore, reconcile } from 'solid-js/store';
 import { useInterval, useIntervalFn } from 'solidjs-use';
 import ResponseView from './ResponseView';
 
@@ -32,23 +32,20 @@ let dec = new TextDecoder()
 const App: Component = () => {
   let seq = 0;
   const sendTimes: { [index: number]: number } = {}
-  const [devices, setDevices] = createStore<{ [index: string]: PingData[] }>({}) //({ device1: [{ delay: 100, seq: 0 }, { delay: 500, seq: 0 }, { delay: 2000, seq: 0 }] }); // 
+  const [devices, setDevices] = createStore<{ [index: string]: { name: string, data: PingData[] } }>({}) //({ device1: [{ delay: 100, seq: 0 }, { delay: 500, seq: 0 }, { delay: 2000, seq: 0 }] }); // 
 
   let listener = (data) => {
     let decoded = JSON.parse(dec.decode(data))
     if (is_response(decoded)) {
-      console.log("Received Gossip: ", decoded);
       if (decoded.sender !== window.webxdc.selfName) {
         return
       }
 
       let delay = Date.now() - sendTimes[decoded.seq]
       if (!devices[decoded.respondant]) {
-        setDevices(decoded.respondant, [{ delay, seq: decoded.seq }])
-        console.log("Setting Devices: ", devices);
-
+        setDevices(decoded.respondant, { name: decoded.respondant, data: [{ delay, seq: decoded.seq }] })
       } else {
-        setDevices(decoded.respondant, l => [...l, { delay, seq: decoded.seq }])
+        setDevices(decoded.respondant, 'data', reconcile([...devices[decoded.respondant].data, { delay, seq: decoded.seq }]))
       }
 
     } else if (is_request(decoded)) {
@@ -58,7 +55,7 @@ const App: Component = () => {
   }
 
   const { pause, resume, isActive } = useIntervalFn(() => {
-    console.log("Sending Ping");
+    // console.log("Sending Ping");
     sendTimes[seq] = Date.now()
     let req: Request = { sender: window.webxdc.selfName, seq }
     realtimeChannel.send(enc.encode(JSON.stringify(req)))
@@ -89,9 +86,9 @@ const App: Component = () => {
         <button class="margin-auto mt-10 self-center bg-primary text-white p-2 rounded-md" onClick={() => { if (isActive()) { leave() } else { join() } }}> {isActive() ? "Leave Realtime" : "Join Realtime"} </button>
 
         <div class="flex flex-wrap gap-5 mt-5 justify-center">
-          <For each={Object.entries(devices)} fallback={
+          <For each={Object.values(devices)} fallback={
             < p class="text-center text-gray-600 font-italic"> {isActive() ? "Waiting for pings .." : "You need to join the gossip"}</p>}>
-            {([user, data]) => ResponseView({ user, data })}
+            {(data) => ResponseView(data)}
           </For>
         </div>
       </div>
